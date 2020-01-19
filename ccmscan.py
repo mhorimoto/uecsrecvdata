@@ -1,4 +1,4 @@
-#! /opt/rh/rh-python36/root/usr/bin/python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from socket import *
