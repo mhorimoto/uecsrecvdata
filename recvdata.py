@@ -1,4 +1,4 @@
-#! /opt/rh/rh-python36/root/usr/bin/python
+#! /usr/bin/python3
 #coding: utf-8
 #
 from socket import *
@@ -9,11 +9,12 @@ import time
 import ambient
 import xml.etree.ElementTree as ET
 
-VERSION="2.08"
+VERSION="2.10"
 HOST = ''
 PORT = 16520
 LOGF = "/var/log/uecs/recvdata.log"
 AMBF = "/var/log/uecs/amb.log"
+TMPD = "/tmp/ckua-"
 
 try:
   lgf = open(LOGF,'a',1)   # line buffering
@@ -42,10 +43,15 @@ while True:
   x="{0}-{1}".format(d,t)
   # <?xml version="1.0"?><UECS ver="1.00-E10">
   lgf.write("{0} {1}\n".format(x,msg.decode()))
+  xmlroot = ET.fromstring(msg)
+  ipa = xmlroot.find('IP').text
+  SMPF=TMPD+ipa+".chk"
+  if (os.path.exists(SMPF)):
+    os.remove(SMPF)
   mn191 = int(a.minute)
   mn192 = int(a.minute)
   if (mn191%5==0) and (pmnh191!=mn191):
-    xmlroot191 = ET.fromstring(msg)
+    xmlroot191 = xmlroot
     #    lgf.write("{0} 5min interval {1}\n".format(x,xmlroot.find('IP').text))
     if (xmlroot191.find('IP').text=="192.168.0.191"):
       for dt in xmlroot191.iter('DATA'):
@@ -64,7 +70,7 @@ while True:
           pmnh191 = mn191
 
   if (mn192%5==0) and (pmnh192!=mn192):
-    xmlroot192 = ET.fromstring(msg)
+    xmlroot192 = xmlroot
     if (xmlroot192.find('IP').text=="192.168.0.192"):
       for dt in xmlroot192.iter('DATA'):
         if (dt.attrib['type']=="InAirTemp.mIC"):
