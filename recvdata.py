@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/env python3
 #coding: utf-8
 #
 from socket import *
@@ -9,8 +9,8 @@ import time
 import ambient
 import xml.etree.ElementTree as ET
 
-VERSION="2.20"
-HOST = ''
+VERSION="2.21"
+HOST = '192.168.0.66'
 PORT = 16520
 LOGF = "/var/log/uecs/recvdata.log"
 AMBF = "/var/log/uecs/amb.log"
