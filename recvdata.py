@@ -9,7 +9,7 @@ import time
 import ambient
 import xml.etree.ElementTree as ET
 
-VERSION="2.10"
+VERSION="2.20"
 HOST = ''
 PORT = 16520
 LOGF = "/var/log/uecs/recvdata.log"
@@ -22,6 +22,13 @@ except:
   print("Can not open logfile {0}".format(lgf))
   quit()
 
+try:
+  ambf = open(AMBF,'a',1)
+except:
+  print("Can not open ambient logfile {0}".format(ambf))
+  quit()
+
+
 s = socket(AF_INET,SOCK_DGRAM)
 s.bind((HOST,PORT))
 a=datetime.datetime.now()
@@ -29,14 +36,12 @@ d = "{0:4d}/{1:02d}/{2:02d}".format(a.year,a.month,a.day)
 t = "{0:02d}:{1:02d}:{2:02d}".format(a.hour,a.minute,a.second)
 x = "{0}-{1}".format(d,t)
 lgf.write("\n{0} START UECS recvdata.py VER.{1}\n".format(x,VERSION))
+ambf.write("\n{0} START UECS recvdata.py VER.{1}\n".format(x,VERSION))
 pmnh191 = 0
 pmnh192 = 0
 
 while True:
-  msg, address = s.recvfrom(512)
-  if msg == ".":
-    print("Sender is closed")
-    break
+  msg, address = s.recvfrom(4096)
   a=datetime.datetime.now()
   d="{0:4d}/{1:02d}/{2:02d}".format(a.year,a.month,a.day)
   t="{0:02d}:{1:02d}:{2:02d}".format(a.hour,a.minute,a.second)
@@ -64,6 +69,7 @@ while True:
         if (dt.attrib['type']=="cnd.mIC"):
           am191 = ambient.Ambient(15884,'ed86025f2ac0ee2b')
           am191.send({'d1': d1911, 'd2': d1912, 'd3': d1913})
+          ambf.write("{0} 192.168.0.191 {2} {3} {4}\n".format(x,d1911,d1912,d1913))
           d1911 = 0.0
           d1912 = 0.0
           d1913 = 0
@@ -82,12 +88,14 @@ while True:
         if (dt.attrib['type']=="cnd.mIC"):
           am192 = ambient.Ambient(15962,'f084426b6bed4c3e')
           am192.send({'d1': d1921, 'd2': d1922, 'd3': d1923})
+          ambf.write("{0} 192.168.0.192 {2} {3} {4}\n".format(x,d1921,d1922,d1923))
           d1921 = 0.0
           d1922 = 0.0
           d1923 = 0
           pmnh192 = mn192
 
 lgf.close()
+ambf.close()
 s.close()
-sys.exit()
+sys.quit()
 
