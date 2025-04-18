@@ -7,6 +7,7 @@ import os
 import datetime
 import time
 import syslog
+import requests
 import xml.etree.ElementTree as ET
 import paho.mqtt.client as mqtt
 import configparser
@@ -19,6 +20,13 @@ HOST = ''
 PORT = int(config['uecs']['Port'])
 print(PORT)
 TMPD = "/tmp/ckua-"
+
+aid = int(config['uecsconsole']['m304id'])
+aip = config['uecsconsole']['m304ip']
+url = config['uecsconsole']['url']
+mac = config['uecsconsole']['m304mac']
+
+print("ID={0} IP={1}".format(aid,aip))
 
 s = socket(AF_INET,SOCK_DGRAM)
 s.bind((HOST,PORT))
@@ -51,6 +59,21 @@ while True:
   ipa      = xmlroot.find('IP').text
   logm     = "{0},{1},{2},{3},{4},{5},{6},{7}".format(x,ccmtype,room,region,order,priority,value,ipa)
   syslog.syslog(syslog.LOG_INFO,logm)
+  if (ipa==aip):
+    params = {"M":mac}
+    data = {
+      "V":value
+    }
+    try:
+      response = requests.post(url,params=params,data=data)
+      if response.status_code == 200:
+        pass
+      else:
+        print(f"error")
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+        
+
 #  if (ccmtype=='WRadiation'):
   topictop = config['mqtt']['TopicTop']
   pubtopic = "{0}/data/{1}/{2}/{3}/{4}/{5}".format(topictop,room,region,order,ccmtype,ipa)
