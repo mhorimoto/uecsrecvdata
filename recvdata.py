@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #coding: utf-8
 #
-from socket import *
+import socket
 import sys
 import os
 import datetime
@@ -14,7 +14,7 @@ import configparser
 config = configparser.ConfigParser()
 config.read('/usr/local/etc/uecsgw/config.ini')
 
-VERSION="3.10"
+VERSION="3.20"
 HOST = ''
 PORT = int(config['uecs']['Port'])
 TMPD = "/tmp/ckua-"
@@ -39,7 +39,9 @@ if (config['uecsconsole']['Valid'] != 'no'):
 else:
   uecsConsoleEnable = False
 
-s = socket(AF_INET,SOCK_DGRAM)
+s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 s.bind((HOST,PORT))
 a = datetime.datetime.now()
 d = "{0:4d}/{1:02d}/{2:02d}".format(a.year,a.month,a.day)
